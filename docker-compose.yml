@@ -1,0 +1,16 @@
+services:
+  api-gateway:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=development
+      - DEBUG=true
+      - USER_SERVICE_URL=http://user-service:8002
+      - PAYMENT_SERVICE_URL=http://payment-service:8001
+      - INTERNAL_API_SECRET=${INTERNAL_API_SECRET:-dev-internal-secret}
+      - FIREBASE_CREDENTIALS_PATH=${FIREBASE_CREDENTIALS_PATH:-}
+      - DEV_BYPASS_TOKEN=${DEV_BYPASS_TOKEN:-}
+    env_file:
+      - .env
+    restart: unless-stopped
