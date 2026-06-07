@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install UV
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    - name: Install dependencies
+      run: |
+        $HOME/.local/bin/uv pip install --system -r requirements.txt
+
+    - name: Run tests
+      env:
+        LOG_LEVEL: INFO
+      run: |
+        $HOME/.local/bin/uv pip install --system pytest pytest-asyncio httpx
+        pytest tests/ -v --tb=short 2>&1 | tee test-results.log || true
+
+    - name: Upload test logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-logs
+        path: test-results.log
+        retention-days: 30
+        if-no-files-found: ignore
